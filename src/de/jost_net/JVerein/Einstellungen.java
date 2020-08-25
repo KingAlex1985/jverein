@@ -181,7 +181,7 @@ public class Einstellungen
    * @param kontonummer
    * @return true, wenn die Kombi ok ist.
    */
-  public final static boolean checkAccountCRC(String blz, String kontonummer)
+  public static final boolean checkAccountCRC(String blz, String kontonummer)
   {
     QueryMessage q = new QueryMessage(blz + ":" + kontonummer);
     Application.getMessagingFactory()
@@ -203,7 +203,7 @@ public class Einstellungen
    *          BLZ.
    * @return Name der Bank oder Leerstring.
    */
-  public final static String getNameForBLZ(String blz)
+  public static final String getNameForBLZ(String blz)
   {
     QueryMessage q = new QueryMessage(blz);
     Application.getMessagingFactory()
@@ -267,14 +267,9 @@ public class Einstellungen
    * @return IMAP copy data
    * @throws RemoteException
    */
-  public static IMAPCopyData getImapCopyData() throws RemoteException
-  {
-    IMAPCopyData imapCopyData = new IMAPCopyData(
-        getEinstellung().getCopyToImapFolder(),
-        getEinstellung().getImapAuthUser(), getEinstellung().getImapAuthPwd(),
-        getEinstellung().getImapHost(), getEinstellung().getImapPort(),
-        getEinstellung().getImapSsl(), getEinstellung().getImapStartTls(),
-        getEinstellung().getImapSentFolder());
-    return imapCopyData;
-  }
+	public static IMAPCopyData getImapCopyData() throws RemoteException {
+		return new IMAPCopyData(einstellung.getCopyToImapFolder(), einstellung.getImapAuthUser(),
+				einstellung.getImapAuthPwd(), einstellung.getImapHost(), einstellung.getImapPort(),
+				einstellung.getImapSsl(), einstellung.getImapStartTls(), einstellung.getImapSentFolder());
+	}
 }

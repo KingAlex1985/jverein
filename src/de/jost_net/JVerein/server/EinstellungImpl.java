@@ -446,7 +446,7 @@ public class EinstellungImpl extends AbstractDBObject implements Einstellung
   public void setGeburtsdatumPflicht(Boolean geburtsdatumpflicht)
       throws RemoteException
   {
-    setAttribute("geburtsdatumpflicht", Boolean.valueOf(geburtsdatumpflicht));
+    setAttribute("geburtsdatumpflicht", geburtsdatumpflicht);
   }
 
   @Override
@@ -831,7 +831,7 @@ public class EinstellungImpl extends AbstractDBObject implements Einstellung
     Double d = (Double) getAttribute("spendenbescheinigungminbetrag");
     if (d == null)
     {
-      d = new Double(0);
+      d = Double.valueOf(0L);
     }
     return (d);
   }
@@ -1332,7 +1332,7 @@ public class EinstellungImpl extends AbstractDBObject implements Einstellung
     {
       DBIterator<Felddefinition> it = Einstellungen.getDBService()
           .createList(Felddefinition.class);
-      hasZus = new Boolean(it.size() > 0);
+      hasZus = it.size() > 0;
     }
     return hasZus;
   }
