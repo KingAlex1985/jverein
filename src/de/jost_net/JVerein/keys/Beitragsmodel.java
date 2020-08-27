@@ -21,11 +21,14 @@ package de.jost_net.JVerein.keys;
  */
 public enum Beitragsmodel
 {
-  GLEICHERTERMINFUERALLE(1, "Gleicher Termin für alle"), MONATLICH12631(
-      5,
-      "monatlich mit monatl., viertel-, halb- oder jährlicher Zahlungsweise zu fixen Terminen"), FLEXIBEL(
-      10,
-      "monatl., viertel-, halb- oder jährliche Zahlungsweise zu flexiblen Terminen");
+  // @formatter:off
+
+  GLEICHERTERMINFUERALLE(1, "Gleicher Termin für alle"), 
+  MONATLICH12631(5, "monatlich mit monatl., viertel-, halb- oder jährlicher Zahlungsweise zu fixen Terminen"), 
+  FLEXIBEL(10, "monatl., viertel-, halb- oder jährliche Zahlungsweise zu flexiblen Terminen");
+
+  // @formatter:on
+
   private final String text;
 
   private final int key;

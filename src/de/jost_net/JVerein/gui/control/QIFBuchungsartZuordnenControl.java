@@ -19,37 +19,25 @@ package de.jost_net.JVerein.gui.control;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.*;
+import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.TableItem;
-
 import de.jost_net.JVerein.Einstellungen;
 import de.jost_net.JVerein.rmi.Buchungsart;
 import de.jost_net.JVerein.rmi.QIFImportPos;
 import de.jost_net.JVerein.util.JVDateFormatTTMMJJJJ;
-import de.willuhn.datasource.GenericIterator;
-import de.willuhn.datasource.pseudo.PseudoIterator;
-import de.willuhn.datasource.rmi.DBIterator;
-import de.willuhn.jameica.gui.AbstractControl;
-import de.willuhn.jameica.gui.AbstractView;
-import de.willuhn.jameica.gui.Action;
-import de.willuhn.jameica.gui.GUI;
-import de.willuhn.jameica.gui.Part;
-import de.willuhn.jameica.gui.formatter.CurrencyFormatter;
-import de.willuhn.jameica.gui.formatter.DateFormatter;
-import de.willuhn.jameica.gui.formatter.TableFormatter;
-import de.willuhn.jameica.gui.input.CheckboxInput;
-import de.willuhn.jameica.gui.input.Input;
-import de.willuhn.jameica.gui.input.SelectInput;
-import de.willuhn.jameica.gui.input.TextInput;
-import de.willuhn.jameica.gui.parts.Column;
-import de.willuhn.jameica.gui.parts.TablePart;
+import de.willuhn.datasource.*;
+import de.willuhn.datasource.pseudo.*;
+import de.willuhn.datasource.rmi.*;
+import de.willuhn.jameica.gui.*;
+import de.willuhn.jameica.gui.formatter.*;
+import de.willuhn.jameica.gui.input.*;
 import de.willuhn.jameica.gui.util.Font;
-import de.willuhn.jameica.gui.util.SWTUtil;
-import de.willuhn.logging.Logger;
-import de.willuhn.util.ApplicationException;
+import de.willuhn.jameica.gui.parts.*;
+import de.willuhn.jameica.gui.util.*;
+import de.willuhn.logging.*;
+import de.willuhn.util.*;
 
 public class QIFBuchungsartZuordnenControl extends AbstractControl
 {
@@ -112,14 +100,14 @@ public class QIFBuchungsartZuordnenControl extends AbstractControl
         @Override
         public void handleEvent(Event event)
         {
-          cbboxPosSperre_valueChanged();
+          cbboxPosSperreValueChanged();
         }
       });
     }
     return cbboxPosSperre;
   }
 
-  private void cbboxPosSperre_valueChanged()
+  private void cbboxPosSperreValueChanged()
   {
     Boolean sperre = (Boolean) cbboxPosSperre.getValue();
     if (sperre.booleanValue())
@@ -143,23 +131,6 @@ public class QIFBuchungsartZuordnenControl extends AbstractControl
       externeBuchungsartInput.disable();
     }
     return externeBuchungsartInput;
-  }
-
-  private void aktuallisierenExterneBuchartInput()
-  {
-    try
-    {
-      if (null != qifImportPos)
-      {
-        getExterneBuchungsartInput().setValue(qifImportPos.getQIFBuchart());
-        return;
-      }
-    }
-    catch (RemoteException ex)
-    {
-      Logger.error("Fehler: ", ex);
-    }
-    getExterneBuchungsartInput().setValue("");
   }
 
   public Part getPositionsListe() throws RemoteException
@@ -194,19 +165,10 @@ public class QIFBuchungsartZuordnenControl extends AbstractControl
     posBeispielListTable.removeAll();
     while (iteratorQIFImportPosList.hasNext())
     {
-      QIFImportPos importPos = (QIFImportPos) iteratorQIFImportPosList.next();
+      QIFImportPos importPos = iteratorQIFImportPosList.next();
       posBeispielListTable.addItem(importPos);
     }
     posBeispielListTable.sort();
-  }
-
-  private void synchronisiereComboBoxBuchungsArt() throws RemoteException
-  {
-    Buchungsart buchungsArt = null;
-    if (null != qifImportPos)
-      buchungsArt = qifImportPos.getBuchungsart();
-    buchungsartInput.setValue(buchungsArt);
-
   }
 
   private Buchungsart getAktuelleBuchart() throws RemoteException
@@ -214,21 +176,6 @@ public class QIFBuchungsartZuordnenControl extends AbstractControl
     if (null == qifImportPos)
       return null;
     return qifImportPos.getBuchungsart();
-  }
-
-  private void ladeQIFPosListFuerQIFBuchungsart(QIFImportPos importPos)
-      throws RemoteException
-  {
-    String qifBuchart = importPos.getQIFBuchart();
-    iteratorQIFImportPosList = Einstellungen.getDBService()
-        .createList(QIFImportPos.class);
-    if (null != qifBuchart)
-      iteratorQIFImportPosList.addFilter(QIFImportPos.COL_QIF_BUCHART + " = ?",
-          qifBuchart);
-    else
-      iteratorQIFImportPosList.addFilter(QIFImportPos.COL_POSID + " = ?",
-          importPos.getID());
-    iteratorQIFImportPosList.setOrder("ORDER BY " + QIFImportPos.COL_POSID);
   }
 
   public Input getBuchungsartInput() throws RemoteException
@@ -283,6 +230,12 @@ public class QIFBuchungsartZuordnenControl extends AbstractControl
       }
     }
 
+    private void refreshSelectedQIFImportPos() throws RemoteException
+    {
+      qifImportPos.load(qifImportPos.getID());
+      distinctBuchartListTable.updateItem(qifImportPos, qifImportPos);
+    }
+
     private void getInputValues()
     {
       storeMitgliedbar = (Boolean) cbMitgliedZuordnenErlaubt.getValue();
@@ -314,19 +267,13 @@ public class QIFBuchungsartZuordnenControl extends AbstractControl
       iteratorQIFImportPosList.begin();
       while (iteratorQIFImportPosList.hasNext())
       {
-        QIFImportPos importPos = (QIFImportPos) iteratorQIFImportPosList.next();
+        QIFImportPos importPos = iteratorQIFImportPosList.next();
         importPos.setBuchungsart(storeBuchart);
         importPos.setGesperrt(storeSperre);
         importPos.setMitgliedZuordenbar(storeMitgliedbar);
         importPos.store();
       }
     }
-  }
-
-  private void refreshSelectedQIFImportPos() throws RemoteException
-  {
-    qifImportPos.load(qifImportPos.getID());
-    distinctBuchartListTable.updateItem(qifImportPos, qifImportPos);
   }
 
   // ------------------------------ Test
@@ -350,16 +297,16 @@ public class QIFBuchungsartZuordnenControl extends AbstractControl
     String letzteBuchart = "";
     while (it.hasNext())
     {
-      QIFImportPos pos = (QIFImportPos) it.next();
+      QIFImportPos pos = it.next();
       String qifBuchart = pos.getQIFBuchart();
       if (null == qifBuchart)
       {
         letzteBuchart = "";
         l.add(pos);
       }
-      else if (letzteBuchart.equals(qifBuchart) == false)
+      else if (!letzteBuchart.equals(qifBuchart))
       {
-        letzteBuchart = new String(qifBuchart);
+        letzteBuchart = qifBuchart;
         l.add(pos);
       }
     }
@@ -396,26 +343,68 @@ public class QIFBuchungsartZuordnenControl extends AbstractControl
     @Override
     public void handleEvent(Event event)
     {
-      selectionChanged_BuchartList();
+      selectionChangedBuchartList();
     }
-  }
 
-  private void selectionChanged_BuchartList()
-  {
-    try
+    private void selectionChangedBuchartList()
     {
-      qifImportPos = (QIFImportPos) distinctBuchartListTable.getSelection();
-      cbboxPosSperre.setValue(qifImportPos.getGesperrt());
-      cbMitgliedZuordnenErlaubt.setValue(qifImportPos.getMitgliedZuordenbar());
-      ladeQIFPosListFuerQIFBuchungsart(qifImportPos);
-      aktuallisiereQIFPosListAnzeige();
-      synchronisiereComboBoxBuchungsArt();
-      aktuallisierenExterneBuchartInput();
-      cbboxPosSperre_valueChanged();
+      try
+      {
+        qifImportPos = (QIFImportPos) distinctBuchartListTable.getSelection();
+        cbboxPosSperre.setValue(qifImportPos.getGesperrt());
+        cbMitgliedZuordnenErlaubt
+            .setValue(qifImportPos.getMitgliedZuordenbar());
+        ladeQIFPosListFuerQIFBuchungsart(qifImportPos);
+        aktuallisiereQIFPosListAnzeige();
+        synchronisiereComboBoxBuchungsArt();
+        aktuallisierenExterneBuchartInput();
+        cbboxPosSperreValueChanged();
+      }
+      catch (Exception ex)
+      {
+        Logger.error("Fehler", ex);
+      }
     }
-    catch (Throwable ex)
+
+    private void ladeQIFPosListFuerQIFBuchungsart(QIFImportPos importPos)
+        throws RemoteException
     {
-      Logger.error("Fehler", ex);
+      String qifBuchart = importPos.getQIFBuchart();
+      iteratorQIFImportPosList = Einstellungen.getDBService()
+          .createList(QIFImportPos.class);
+      if (null != qifBuchart)
+        iteratorQIFImportPosList
+            .addFilter(QIFImportPos.COL_QIF_BUCHART + " = ?", qifBuchart);
+      else
+        iteratorQIFImportPosList.addFilter(QIFImportPos.COL_POSID + " = ?",
+            importPos.getID());
+      iteratorQIFImportPosList.setOrder("ORDER BY " + QIFImportPos.COL_POSID);
+    }
+
+    private void aktuallisierenExterneBuchartInput()
+    {
+      try
+      {
+        if (null != qifImportPos)
+        {
+          getExterneBuchungsartInput().setValue(qifImportPos.getQIFBuchart());
+          return;
+        }
+      }
+      catch (RemoteException ex)
+      {
+        Logger.error("Fehler: ", ex);
+      }
+      getExterneBuchungsartInput().setValue("");
+    }
+
+    private void synchronisiereComboBoxBuchungsArt() throws RemoteException
+    {
+      Buchungsart buchungsArt = null;
+      if (null != qifImportPos)
+        buchungsArt = qifImportPos.getBuchungsart();
+      buchungsartInput.setValue(buchungsArt);
+
     }
   }
 
@@ -431,7 +420,7 @@ public class QIFBuchungsartZuordnenControl extends AbstractControl
       try
       {
         QIFImportPos pos = (QIFImportPos) item.getData();
-        if (pos.getGesperrt())
+        if (Boolean.TRUE.equals(pos.getGesperrt()))
         {
           item.setImage(1, imageLocked);
         }
@@ -444,7 +433,7 @@ public class QIFBuchungsartZuordnenControl extends AbstractControl
         else
           item.setImage(1, imageOk);
       }
-      catch (Throwable ex)
+      catch (Exception ex)
       {
         Logger.error("Fehler", ex);
       }

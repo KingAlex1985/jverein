@@ -21,3 +21,4 @@ _book
 *.mobi
 *.pdf
 >>>>>>> branch 'master' of https://github.com/jverein/jverein.git
+/target/
